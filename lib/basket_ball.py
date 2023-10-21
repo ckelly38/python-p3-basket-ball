@@ -182,3 +182,166 @@ def game_dict():
             ]
         }
     }
+
+mygdct = game_dict();
+
+def getTeamTypeForPlayer(name):
+    if (name == None or len(name) < 1): return "";
+    else: pass;
+    global mygdct;
+    myhps = mygdct["home"]["players"];
+    myaps = mygdct["away"]["players"];
+    for n in range(len(myhps)):
+        if (myhps[n]["name"] == name): return "home";
+        else: pass;
+    for n in range(len(myaps)):
+        if (myaps[n]["name"] == name): return "away";
+        else: pass;
+    return "";
+
+def team_names():
+    global mygdct;
+    return [mygdct["home"]["team_name"], mygdct["away"]["team_name"]];
+
+def getTypeOfTeamFromName(tmname):
+    tmnms = team_names();
+    teamtype = "";
+    if (tmnms[0] == tmname): teamtype = "home";
+    elif (tmnms[1] == tmname): teamtype = "away";
+    else: pass;
+    return teamtype;
+
+def team_colors(name):
+    if (name == None or len(name) < 1): return [];
+    else: pass;
+    teamtype = getTypeOfTeamFromName(name);
+    if (teamtype == "home" or teamtype == "away"): pass;
+    else: return [];
+    global mygdct;
+    return mygdct[teamtype]["colors"];
+
+def getPlayersOnTeamType(type):
+    global mygdct;
+    if (type == None or len(type) < 1): return [];
+    elif (type == "home" or type == "away"): return mygdct[type]["players"];
+    else: return [];
+
+def player_numbers(tmname):
+    mps = getPlayersOnTeamType(getTypeOfTeamFromName(tmname));
+    if (mps == None or len(mps) < 1): return [];
+    else: return [mp["number"] for mp in mps];
+
+def getAllPlayers():
+    global mygdct;
+    mhps = mygdct["home"]["players"];
+    maps = mygdct["away"]["players"];
+    return mhps + maps;
+
+def player_stats(name):
+    if (name == None or len(name) < 1): return None;
+    else: pass;
+    mps = getAllPlayers();
+    for mp in mps:
+        if (mp["name"] == name): return mp;
+        else: pass;
+    return None;
+
+def num_points_per_game(name):
+    mp = player_stats(name);
+    if (mp == None): return 0;
+    else: return mp["points_per_game"];
+
+def player_age(name):
+    mp = player_stats(name);
+    if (mp == None): return 0;
+    else: return mp["age"];
+
+def getPlayerInfoForKey(key):
+    if (key == None or len(key) < 1): raise Exception("invalid key found and used here!");
+    else: pass;
+    mps = getAllPlayers();
+    mkeys = mps[0].keys();
+    useit = False;
+    for mkey in mkeys:
+        if (mkey == key):
+            useit = True;
+            break;
+        else: pass;
+    if (useit): return [mp[key] for mp in mps];
+    else: raise Exception("invalid key found and used here!");
+
+def getAllPlayerNames():
+    return getPlayerInfoForKey("name");
+
+def getShoeBrandsForEachPlayer():
+    return getPlayerInfoForKey("shoe_brand");
+
+def getReboundsForEachPlayer():
+    return getPlayerInfoForKey("rebounds_per_game");
+
+def getCommonJerseyNumbers():
+    tmnms = team_names();
+    pnumshtm = player_numbers(tmnms[0]);
+    pnumsatm = player_numbers(tmnms[1]);
+    cnums = [];
+    for hnum in pnumshtm:
+        for anum in pnumsatm:
+            if (hnum == anum):
+                cnums.append(hnum);
+                break;
+            else: pass;
+    return cnums;
+
+def getLongestPlayerName():
+    mpnames = getAllPlayerNames();
+    mynamelens = [len(name) for name in mpnames];
+    return max(mynamelens);
+
+def getUniqueShoeBrands():
+    msbs = getShoeBrandsForEachPlayer()
+    if (len(msbs) < 1): return [];
+    else: pass;
+    usbs = [];
+    for msb in msbs:
+        addit = True;
+        if (len(usbs) < 1): pass;
+        else:
+            for n in range(len(usbs)):
+                if (usbs[n] == msb):
+                    addit = False;
+                    break;
+                else: pass;
+        if (addit): usbs.append(msb);
+        else: pass;
+    return usbs;
+
+def getReboundsForUniqueShoeBrand():
+    usbs = getUniqueShoeBrands();
+    msbs = getShoeBrandsForEachPlayer();
+    rbspp = getReboundsForEachPlayer();
+    rbsperusbs = [];
+    for usb in usbs:
+        mlist = [];
+        for i in range(len(msbs)):
+            if (usb == msbs[i]):
+                mlist.append(rbspp[i]);
+        rbsperusbs.append(mlist);
+    return rbsperusbs;
+
+def average(values):
+    if (values == None or len(values) < 1): return 0;
+    else: return (sum(values) / len(values));
+
+def average_rebounds_by_shoe_brand():
+    usbs = getUniqueShoeBrands();
+    rbsperusbs = getReboundsForUniqueShoeBrand();
+    arbsperusbs = [average(rb) for rb in rbsperusbs];
+    #print(usbs);
+    #print(rbsperusbs);
+    #for i in range(len(usbs)): print(average(rbsperusbs[i]));
+    #print(arbsperusbs);
+    for i in range(len(usbs)):
+        print(f"{usbs[i]}:  {arbsperusbs[i]:.2f}");
+    return arbsperusbs;
+
+#print(game_dict()['home']['team_name']);
